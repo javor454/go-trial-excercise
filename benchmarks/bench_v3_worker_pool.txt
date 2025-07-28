@@ -1,0 +1,36 @@
+goos: darwin
+goarch: arm64
+pkg: trialday
+cpu: Apple M3 Pro
+BenchmarkFreq       	       9	2223264639 ns/op	941467204 B/op	25216468 allocs/op
+BenchmarkFreq       	       3	2215944195 ns/op	941467189 B/op	25216469 allocs/op
+BenchmarkFreq       	       3	2211573278 ns/op	941467296 B/op	25216469 allocs/op
+BenchmarkFreq       	       3	2216835014 ns/op	941467290 B/op	25216469 allocs/op
+BenchmarkFreq       	       3	2216818958 ns/op	941467298 B/op	25216469 allocs/op
+BenchmarkFreq       	       3	2219370514 ns/op	941467352 B/op	25216469 allocs/op
+BenchmarkFreq-2     	       5	1167687592 ns/op	941573312 B/op	25216547 allocs/op
+BenchmarkFreq-2     	       5	1204887542 ns/op	941573379 B/op	25216546 allocs/op
+BenchmarkFreq-2     	       5	1190653408 ns/op	941573667 B/op	25216546 allocs/op
+BenchmarkFreq-2     	       5	1185034742 ns/op	941573638 B/op	25216549 allocs/op
+BenchmarkFreq-2     	       5	1182097550 ns/op	941574761 B/op	25216557 allocs/op
+BenchmarkFreq-2     	       5	1201006292 ns/op	941574604 B/op	25216558 allocs/op
+BenchmarkFreq-4     	       9	 590944847 ns/op	941730041 B/op	25216419 allocs/op
+BenchmarkFreq-4     	       9	 587777009 ns/op	941727706 B/op	25216402 allocs/op
+BenchmarkFreq-4     	       9	 596550880 ns/op	941731776 B/op	25216418 allocs/op
+BenchmarkFreq-4     	       9	 588350384 ns/op	941730045 B/op	25216410 allocs/op
+BenchmarkFreq-4     	       9	 589598931 ns/op	941731263 B/op	25216422 allocs/op
+BenchmarkFreq-4     	       9	 579869435 ns/op	941729173 B/op	25216404 allocs/op
+BenchmarkFreq-8     	      10	 510231071 ns/op	942805869 B/op	25219473 allocs/op
+BenchmarkFreq-8     	      10	 511268650 ns/op	942809447 B/op	25219499 allocs/op
+BenchmarkFreq-8     	      10	 516068479 ns/op	942822823 B/op	25219543 allocs/op
+BenchmarkFreq-8     	      10	 516390871 ns/op	942834210 B/op	25219621 allocs/op
+BenchmarkFreq-8     	      10	 519755188 ns/op	942838250 B/op	25219654 allocs/op
+BenchmarkFreq-8     	      10	 524488071 ns/op	942847123 B/op	25219728 allocs/op
+BenchmarkFreq-12    	       9	 575980268 ns/op	943899379 B/op	25223256 allocs/op
+BenchmarkFreq-12    	       9	 602707847 ns/op	943863302 B/op	25223110 allocs/op
+BenchmarkFreq-12    	       9	 596029426 ns/op	943856840 B/op	25223074 allocs/op
+BenchmarkFreq-12    	       9	 573911435 ns/op	943921352 B/op	25223323 allocs/op
+BenchmarkFreq-12    	       9	 569145056 ns/op	943920314 B/op	25223276 allocs/op
+BenchmarkFreq-12    	       9	 572701009 ns/op	943935272 B/op	25223307 allocs/op
+PASS
+ok  	trialday	292.667s

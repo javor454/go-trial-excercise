@@ -1,4 +1,8 @@
 # Go Trial Day Excersize
+- copy of https://github.com/marek-drapal/go-trial-excersize
+    - is not linked in any way to not reveal solutions
+
+## Assignment
 - change the implementation of freq function to find all occurences of loookUpColor in the Color tag in xml file
 - goal is to find the most optimal algorithm
     - implement solution
@@ -23,8 +27,47 @@
 - Worker pool
     - Implement a worker pool with a fixed number of goroutines
     - Use channels to distribute work (file names) to workers
+        - options
+            - file based distribution (each worker processed entire file)
+            - product based distribution (each worker processes product)
     - Learn about channel buffering and synchronization
+        - Unbuffered channel - sender blocks until receiver is ready
+        - Buffered channel - sender doesnt block until buffer is full
     - Explore different worker pool sizes and their impact
+        - why base numWorkers on runtime.NumCPU()?
+            - task is IO (file reading) with CPU work (xml parsing)
+            - for IO tasks you can use more goroutines than CPU cores
+        - versions
+            - under utilization: numWorkers = (runtime.NumCPU() / 2)
+            - optimal for CPU-bound tasks: numWorkers = runtime.NumCPU()
+            - over subscription: numWorkers = (runtime.NumCPU() * 2)
+    - Try to use sync package
+        - sync.WaitGroup for graceful shutdown
+        - sync.Pool for xml decoder reuse
+    - V1
+        - numWorkers equal to number of CPUs -> seems to be optimal
+        - waitgroup for all documents
+        - compared with V1 sequential on average
+            - Time performance: -74.42% (faster, with 8 workers)
+            - Memory usage:     negligible
+            - Allocations:      negligible
+        - cpu profile
+            - most time spend on scheduling, locking, sleeping -> goroutines waiting for work, main goroutine waiting for results
+        - memory profile
+            - most memory consumed by xml parsing / unmarshalling
+                - reuse buffers or decoders with sync.Pool
+    - V2
+        - waitgroup for workers
+        - compared with V1 worker pool on average
+            - Time performance: up to +2% (slower)
+            - Memory usage:     negligible
+            - Allocations:      negligible
+    - V3
+        - sync.Pool for Products (not for xml decoder - this requires reseting the decoder which is not supported by its api)
+        - compared with V2 worker pool on average
+            - Time performance: negligible
+            - Memory usage:     +0.12% (more memory)
+            - Allocations:      +0.38 (worse)
 - Fan-in / Fan-out
     - Start multiple goroutines to process files concurrently
     - Collect results using channels

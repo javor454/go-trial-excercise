@@ -1,4 +1,4 @@
-package main
+package solution
 
 import (
 	"encoding/xml"
@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-func freqSequentialV1(color string, docs []string) int {
+
+func FreqSequentialV1(color string, docs []string) int {
 	var found int
 
 	for _, doc := range docs {
@@ -21,7 +22,7 @@ func freqSequentialV1(color string, docs []string) int {
 			log.Fatal(err)
 		}
 
-		var doc document
+		var doc Document
 		err = xml.Unmarshal(bytes, &doc)
 		if err != nil {
 			log.Fatal(err)
@@ -37,7 +38,7 @@ func freqSequentialV1(color string, docs []string) int {
 	return found
 }
 
-func freqSequentialV2(color string, docs []string) int {
+func FreqSequentialV2(color string, docs []string) int {
 	var found int
 
 	for _, doc := range docs {
@@ -63,7 +64,7 @@ func freqSequentialV2(color string, docs []string) int {
 			switch t := token.(type) {
 			case xml.StartElement:
 				if t.Name.Local == "Product" {
-					var product product
+					var product Product
 					err = decoder.DecodeElement(&product, &t)
 					if err != nil {
 						log.Fatal(err)

@@ -1,31 +1,20 @@
 package main
 
 import (
-	"encoding/xml"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"runtime/pprof"
+
+	"trialday/solution"
 )
 
-type (
-	product struct {
-		XMLName xml.Name `xml:"Product"`
-		Color   string   `xml:"Color"`
-	}
-
-	document struct {
-		XMLName  xml.Name  `xml:"Products"`
-		Products []product `xml:"Product"`
-	}
-
-	Args struct {
-		Version string
-		Profile string
-		Name    string
-	}
-)
+type Args struct {
+	Version  string
+	Profile  string
+	Solution string
+}
 
 const (
 	docsNumber  = 5000
@@ -46,7 +35,7 @@ func main() {
 func profilingWrapper(color string, docs []string, args Args, solutionFn func(color string, docs []string) int) (int, error) {
 	switch args.Profile {
 	case "cpu":
-		f, _ := os.Create(fmt.Sprintf("profiles/cpu/prof_v%s_%s.prof", args.Version, args.Name))
+		f, _ := os.Create(fmt.Sprintf("profiles/cpu/prof_v%s_%s.prof", args.Version, args.Solution))
 		defer f.Close()
 
 		pprof.StartCPUProfile(f)
@@ -54,7 +43,7 @@ func profilingWrapper(color string, docs []string, args Args, solutionFn func(co
 
 		return solutionFn(color, docs), nil
 	case "mem":
-		f, _ := os.Create(fmt.Sprintf("profiles/mem/prof_v%s_%s.prof", args.Version, args.Name))
+		f, _ := os.Create(fmt.Sprintf("profiles/mem/prof_v%s_%s.prof", args.Version, args.Solution))
 		defer f.Close()
 
 		runtime.GC() // ensure a clean memory state
@@ -64,7 +53,7 @@ func profilingWrapper(color string, docs []string, args Args, solutionFn func(co
 
 		return result, nil
 	case "block":
-		f, _ := os.Create(fmt.Sprintf("profiles/block/prof_v%s_%s.prof", args.Version, args.Name))
+		f, _ := os.Create(fmt.Sprintf("profiles/block/prof_v%s_%s.prof", args.Version, args.Solution))
 		defer f.Close()
 
 		blockProfile := pprof.Lookup("block")
@@ -72,14 +61,14 @@ func profilingWrapper(color string, docs []string, args Args, solutionFn func(co
 
 		return solutionFn(color, docs), nil
 	case "go":
-		f, _ := os.Create(fmt.Sprintf("profiles/go/prof_v%s_%s.prof", args.Version, args.Name))
+		f, _ := os.Create(fmt.Sprintf("profiles/go/prof_v%s_%s.prof", args.Version, args.Solution))
 		defer f.Close()
 
 		pprof.Lookup("goroutine").WriteTo(f, 0)
 
 		return solutionFn(color, docs), nil
 	case "mut":
-		f, _ := os.Create(fmt.Sprintf("profiles/mut/prof_v%s_%s.prof", args.Version, args.Name))
+		f, _ := os.Create(fmt.Sprintf("profiles/mut/prof_v%s_%s.prof", args.Version, args.Solution))
 		defer f.Close()
 
 		mutexProfile := pprof.Lookup("mutex")
@@ -90,20 +79,36 @@ func profilingWrapper(color string, docs []string, args Args, solutionFn func(co
 	}
 }
 
+// TODO add trace, compare worker pool solutions
+
 func freq(color string, docs []string) int {
 	args := parseArgs()
 	var solutionFn func(color string, docs []string) int
 
-	switch args.Version {
-	case "1":
-		solutionFn = freqSequentialV1
-	case "2":
-		solutionFn = freqSequentialV2
-	default:
-		log.Fatalf("invalid version: %s", args.Version)
+	switch args.Solution {
+	case "sequential":
+		switch args.Version {
+		case "1":
+			solutionFn = solution.FreqSequentialV1
+		case "2":
+			solutionFn = solution.FreqSequentialV2
+		default:
+			log.Fatalf("invalid version: %s", args.Version)
+		}
+	case "worker_pool":
+		switch args.Version {
+		case "1":
+			solutionFn = solution.FreqWorkerPoolV1
+		case "2":
+			solutionFn = solution.FreqWorkerPoolV2
+		case "3":
+			solutionFn = solution.FreqWorkerPoolV3
+		default:
+			log.Fatalf("invalid version: %s", args.Version)
+		}
 	}
 
-	if args.Profile != "" && args.Name != "" {
+	if args.Profile != "" {
 		result, err := profilingWrapper(color, docs, args, solutionFn)
 		if err != nil {
 			log.Fatal(err)
@@ -117,8 +122,8 @@ func freq(color string, docs []string) int {
 
 func parseArgs() Args {
 	return Args{
-		Version: os.Getenv("version"),
-		Profile: os.Getenv("profile"),
-		Name:    os.Getenv("name"),
+		Version:  os.Getenv("version"),
+		Profile:  os.Getenv("profile"),
+		Solution: os.Getenv("solution"),
 	}
 }
