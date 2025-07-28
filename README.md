@@ -13,6 +13,15 @@
 
 
 ## Solutions
+### Performance comparison table (geomean)
+|| Sequential V1 | Sequential V1 vs V2 | Sequential V2 vs Worker pool V1 | Worker pool V1 vs V2 | Worker Pool V1 vs V3 |
+|-|-|-|-|-|-|
+| **Time performance** | ~1.989 s/op          | 2.082 s/op ❌ (+4.65%)          | 849.6 ms/op ✅ (-59.18%) | 857.2 ms/op ❌ (+0.89%) | 856.3 ms/op ❌ (+0.78%)         |
+| **Memory usage**     | ~1.03 GB/op          | 917 MB/op ✅ (-12.66%)          | same                     | same                    | 942.1 MB/op ❌ (+0.12%)         |
+| **Allocations**      | ~25.18 mil allocs/op | 25.13 mil allocs/op ✅ (-0.20%) | same                     | same                    | 25.22 mil allocs/op ❌ (+0.38%) |
+
+
+### Measurment details
 - Sequential 
     - V1
         - memory bottlenecks
@@ -20,10 +29,6 @@
             - solutions
                 - streaming parser processing one product at a time instead of loading all into memory
     - V2 with streaming parser
-        - compared to V1 on average
-            - Time performance: +4.65%  (slower)
-            - Memory usage:     -12.66% (less memory)
-            - Allocations:      -0.20%  (fewer allocations)
 - Worker pool
     - Implement a worker pool with a fixed number of goroutines
     - Use channels to distribute work (file names) to workers
@@ -47,10 +52,6 @@
     - V1
         - numWorkers equal to number of CPUs -> seems to be optimal
         - waitgroup for all documents
-        - compared with V1 sequential on average
-            - Time performance: -74.42% (faster, with 8 workers)
-            - Memory usage:     negligible
-            - Allocations:      negligible
         - cpu profile
             - most time spend on scheduling, locking, sleeping -> goroutines waiting for work, main goroutine waiting for results
         - memory profile
@@ -58,16 +59,8 @@
                 - reuse buffers or decoders with sync.Pool
     - V2
         - waitgroup for workers
-        - compared with V1 worker pool on average
-            - Time performance: up to +2% (slower)
-            - Memory usage:     negligible
-            - Allocations:      negligible
     - V3
         - sync.Pool for Products (not for xml decoder - this requires reseting the decoder which is not supported by its api)
-        - compared with V2 worker pool on average
-            - Time performance: negligible
-            - Memory usage:     +0.12% (more memory)
-            - Allocations:      +0.38 (worse)
 - Fan-in / Fan-out
     - Start multiple goroutines to process files concurrently
     - Collect results using channels
