@@ -22,3 +22,15 @@ func TestFreq(t *testing.T) {
 		t.Errorf("expected %d occurences got %d", expected, n)
 	}
 }
+
+func BenchmarkFreq(b *testing.B) {
+	docs := make([]string, docsNumber)
+	for i := range docs {
+		docs[i] = fmt.Sprintf("data-%.4d.xml", i)
+	}
+
+	b.ResetTimer() // Reset timer after setup
+	for i := 0; i < b.N; i++ {
+		freq(lookUpColor, docs)
+	}
+}
