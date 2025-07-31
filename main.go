@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"runtime/trace"
 
 	"trialday/solution"
 )
@@ -14,6 +15,7 @@ type Args struct {
 	Version  string
 	Profile  string
 	Solution string
+	Trace    bool
 }
 
 const (
@@ -103,9 +105,31 @@ func freq(color string, docs []string) int {
 			solutionFn = solution.FreqWorkerPoolV2
 		case "3":
 			solutionFn = solution.FreqWorkerPoolV3
+		case "4":
+			solutionFn = solution.FreqWorkerPoolV4
+		case "5":
+			solutionFn = solution.FreqWorkerPoolV5
+		case "6":
+			solutionFn = solution.FreqWorkerPoolV6
 		default:
 			log.Fatalf("invalid version: %s", args.Version)
 		}
+	}
+
+	if args.Trace {
+		traceFile, err := os.OpenFile(
+			fmt.Sprintf("traces/trace_%s_%s.out", args.Solution, args.Version),
+			os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+			0644,
+		)
+		if err != nil {
+			log.Fatalf("failed to open trace file: %v", err)
+		}
+		defer traceFile.Close()
+		if err := trace.Start(traceFile); err != nil {
+			log.Fatalf("failed to start trace: %v", err)
+		}
+		defer trace.Stop()
 	}
 
 	if args.Profile != "" {
@@ -125,5 +149,6 @@ func parseArgs() Args {
 		Version:  os.Getenv("version"),
 		Profile:  os.Getenv("profile"),
 		Solution: os.Getenv("solution"),
+		Trace:    os.Getenv("trace") == "1",
 	}
 }

@@ -14,12 +14,11 @@
 
 ## Solutions
 ### Performance comparison table (geomean)
-|| Sequential V1 | Sequential V1 vs V2 | Sequential V2 vs Worker pool V1 | Worker pool V1 vs V2 | Worker Pool V1 vs V3 |
-|-|-|-|-|-|-|
-| **Time performance** | ~1.989 s/op          | 2.082 s/op ❌ (+4.65%)          | 849.6 ms/op ✅ (-59.18%) | 857.2 ms/op ❌ (+0.89%) | 856.3 ms/op ❌ (+0.78%)         |
-| **Memory usage**     | ~1.03 GB/op          | 917 MB/op ✅ (-12.66%)          | same                     | same                    | 942.1 MB/op ❌ (+0.12%)         |
-| **Allocations**      | ~25.18 mil allocs/op | 25.13 mil allocs/op ✅ (-0.20%) | same                     | same                    | 25.22 mil allocs/op ❌ (+0.38%) |
-
+|                      | Sequential V1        | Sequential V1 vs V2             | Seq V2 vs Worker pool V1 | Worker pool V1 vs V2     | Worker Pool V1 vs V3            | Worker pool V1 vs V4    | Worker pool V4 vs V5             | Worker pool V5 vs V6           |
+|----------------------|----------------------|---------------------------------|--------------------------|--------------------------|---------------------------------|-------------------------|----------------------------------|--------------------------------|
+| **Time performance** | ~1.989 s/op          | 2.082 s/op ❌ (+4.65%)          | 849.6 ms/op ✅ (-59.18%) | 857.2 ms/op ❌ (+0.89%)  | 856.3 ms/op ❌ (+0.78%)         | 845.2 ms/op ✅ (-0.52%) | 773.6 ms/op ✅ (-8.48%)          | 299.0 ms/op ✅ (-61.34%)       |
+| **Memory usage**     | ~1.03 GB/op          | 917 MB/op ✅ (-12.66%)          | same                     | same                     | 942.1 MB/op ❌ (+0.12%)         | same                    | 758.5 MB/op ✅ (-8.48%)          | 167.8 MB/op ✅ (-77.87%)       |
+| **Allocations**      | ~25.18 mil allocs/op | 25.13 mil allocs/op ✅ (-0.20%) | same                     | same                     | 25.22 mil allocs/op ❌ (+0.38%) | same                    | 22.22 mil allocs/op ✅ (-11.55%) | 308.6 k allocs/op ✅ (-98.61%) |
 
 ### Measurment details
 - Sequential 
@@ -61,6 +60,14 @@
         - waitgroup for workers
     - V3
         - sync.Pool for Products (not for xml decoder - this requires reseting the decoder which is not supported by its api)
+    - V4
+        - limit buffer for jobs and results to number of workers, count found colors per each worker, then sumup results from workers in main goroutine
+    - V5
+        - when traversing xml tokens, search for "Color" tokens instead of "Product", then decode only color tag instead of whole product
+    - V6
+        - load whole file into memory and replace xml parser with regex
+        - is not optimal for big xml files
+    
 - Fan-in / Fan-out
     - Start multiple goroutines to process files concurrently
     - Collect results using channels
@@ -87,3 +94,16 @@
     - graceful shutdown
 - error handling
     - in goroutines - send through channel so it's not lost
+- consider using GOMAXPROCS ✅
+    - GOMAXPROCS returns max number of OS threads that can execute go code simultaneosly
+    - by default is = NumCPU, or can be set lower
+    - makes sense to use for container CPU limits, pure CPU-bound work or artificially limit OS thread usage
+- use tracing
+    - cpu profile shows only what is happening in the program
+    - tracing also shows what is not happening (waiting)
+    - info:
+        - https://blog.gopheracademy.com/advent-2017/go-execution-tracer/ 
+        - https://www.sobyte.net/post/2022-03/go-execution-tracer-by-example/
+    - Goroutine tab
+        - shows goroutine state: GCWaiting (waiting during GC), Running (actively executing), Runnable (ready to run but waiting for processor)
+    

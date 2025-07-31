@@ -14,3 +14,6 @@ build:
 
 benchstat:
 	./script/benchstat.sh $(old) $(new)
+
+trace:
+	go tool trace traces/trace_$(solution)_$(version).out
